@@ -4,15 +4,29 @@ import { ref } from "vue";
 const showOverlay = ref(false);
 const input = ref("");
 const todos = ref([]);
+const errorMessage = ref("");
+
+const getRandomColor = () => {
+  const hue = Math.floor(Math.random() * 360);
+  const saturation = "100%";
+  const lightness = "75%";
+  return `hsl(${hue}, ${saturation}, ${lightness})`;
+};
 
 const addTodo = () => {
+  if (input.value.trim().length < 10) {
+    errorMessage.value = "Please enter Minimum 10 Characters";
+    return;
+  }
   todos.value.push({
     id: Math.floor(Math.random() * 100000),
     text: input.value,
     date: new Date(),
+    backgroundColor: getRandomColor(),
   });
   showOverlay.value = false;
   input.value = "";
+  errorMessage.value = "";
 };
 </script>
 
@@ -35,6 +49,10 @@ const addTodo = () => {
           cols="30"
           rows="10"
         ></textarea>
+        <!-- Error Message -->
+        <p v-if="errorMessage" class="text-red-500 font-bold mt-3">
+          {{ errorMessage }}
+        </p>
         <div class="flex flex-col gap-4 mt-10">
           <button @click="addTodo" class="bg-blue-400 py-2">Add Todo</button>
           <button @click="showOverlay = false" class="bg-red-500 py-2">
@@ -60,9 +78,10 @@ const addTodo = () => {
       <div
         v-for="todo in todos"
         :key="todo.id"
-        class="bg-yellow-300 w-[250px] h-[300px] rounded-lg flex flex-col justify-between p-4"
+        :style="{ backgroundColor: todo.backgroundColor }"
+        class="bg-yellow-300 w-[250px] h-[300px] overflow-auto rounded-lg flex flex-col justify-between p-4"
       >
-        <h1>
+        <h1 class="whitespace-normal break-words">
           {{ todo.text }}
         </h1>
         <p class="font-bold">{{ todo.date.toLocaleDateString("en-US") }}</p>
